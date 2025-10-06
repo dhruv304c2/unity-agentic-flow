@@ -8,37 +8,26 @@ public class Talker : MonoBehaviour {
     [SerializeField] Emoter emoter;
     [SerializeField] float typeSpeed = 0.05f; // seconds per character
 
-    bool skip;
+    bool _isTalking;
 
     public async UniTask Talk(string line) {
+        await UniTask.WaitWhile(() => _isTalking);
+        _isTalking = true;
+
         talkPanel.SetActive(true);
         talkText.text = "";
-        skip = false;
-
-        // Run input listener for skip
-        var skipListener = UniTask.Create(async () => {
-            while (!skip) {
-                if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
-                    skip = true;
-                await UniTask.Yield();
-            }
-        });
 
         // Typewriter effect
         for (int i = 0; i < line.Length; i++) {
-            if (skip) {
-                talkText.text = line;
-                break;
-            }
-
             talkText.text += line[i];
             await UniTask.Delay((int)(typeSpeed * 1000));
         }
 
         // Wait briefly before closing
-        await UniTask.WaitForSeconds(0.5f);
+        await UniTask.WaitForSeconds(2f);
 
         talkPanel.SetActive(false);
-        emoter.ResetEmote();
+        emoter.ResetEmote().Forget();
+        _isTalking = false;
     }
 }

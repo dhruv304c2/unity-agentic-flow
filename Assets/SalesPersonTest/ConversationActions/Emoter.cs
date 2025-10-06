@@ -5,7 +5,11 @@ public class Emoter : MonoBehaviour{
     [SerializeField] SkinnedMeshRenderer _skinnedMeshRenderer;
     [SerializeField] float _emoteSpeed = 2.0f;
 
+    bool _isEmoting = false;
+
     public async UniTask Emote(EmoteActionParams param){
+        await UniTask.WaitWhile(() => _isEmoting);
+        _isEmoting = true;
         while(true){
             bool allAtTarget = true;
             for (int i = 0; i < _skinnedMeshRenderer.sharedMesh.blendShapeCount; i++)
@@ -33,9 +37,12 @@ public class Emoter : MonoBehaviour{
             if(allAtTarget) break;
             await UniTask.Yield();
         }
+        _isEmoting = false;
     }
 
     public async UniTask ResetEmote(){
+        await UniTask.WaitWhile(() => _isEmoting);
+        _isEmoting = true;
         while(true){
             bool allAtZero = true;
             for (int i = 0; i < _skinnedMeshRenderer.sharedMesh.blendShapeCount; i++)
@@ -50,5 +57,6 @@ public class Emoter : MonoBehaviour{
             if(allAtZero) break;
             await UniTask.Yield();
         }
+        _isEmoting = false;
     }
 }
