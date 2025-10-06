@@ -10,7 +10,7 @@ public class MoveAction : IAction<DescritpiveContextData>{
     public string Description => "Move a game object to a specified position in 3D space";
     public string ParamDescription => "JSON object with 'destination' (x,y,z coordinates)";
 
-    public class ActionData
+    public class MoveActionData
     {
         public SerializableVector3 destination;
     }
@@ -46,7 +46,20 @@ public class MoveAction : IAction<DescritpiveContextData>{
         Debug.Log($"[MoveAction] Moving {target.name} with param: {param}");
         try
         {
-            var data = JsonConvert.DeserializeObject<ActionData>(param);
+            var data = JsonConvert.DeserializeObject<MoveActionData>(param);
+            if (data == null)
+            {
+                Debug.LogError($"[MoveAction] Failed to parse action param");
+                return false;
+            }
+            var mover = target.GetComponent<Mover>();
+            if (mover == null)
+            {
+                Debug.LogError($"[MoveAction] Mover component not found on target {target.name}");
+                return false;
+            }
+
+            mover.isMoving = true;
 
             // Move object smoothly on main thread
             Vector3 destinationVector = data.destination; // Implicit conversion
@@ -75,8 +88,9 @@ public class MoveAction : IAction<DescritpiveContextData>{
                 }
             }
 
-            context.UptateContext();
             Debug.Log($"[MoveAction] Completed moving {target.name} to {destinationVector}");
+
+            mover.isMoving = false;
             return true;
 
         }

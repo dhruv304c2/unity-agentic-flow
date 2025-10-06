@@ -194,7 +194,7 @@ public class GeminiModelAgent : IAgentModel<LLMPromptData, DescritpiveContextDat
 	    ("move",
 	    "Cube",
 	    JsonConvert.SerializeObject(
-		new MoveAction.ActionData(){
+		new MoveAction.MoveActionData(){
 		destination = new SerializableVector3(rand_x, 0, rand_z)
 	    }))
 	};
