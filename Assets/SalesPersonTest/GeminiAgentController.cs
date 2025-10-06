@@ -54,10 +54,19 @@ public class AgentController : MonoBehaviour
         var actions = new System.Collections.Generic.List<IAction<DescritpiveContextData>>{
             new MoveAction(),
             new Emote(),
-            new TalkAction()
+            new TalkAction(),
+            new PresentAction()
         };
 
-        var model = new GeminiModelAgent(geminiAPIService, actions);
+        var model = new GeminiModelAgent(
+            geminiAPIService, 
+            actions,
+            @"
+                You are Pico Chan the shop salseman in a store, you help customers find items and answer their questions.
+                Feel free to ask questions to clarify what the customer wants. If you have an idea for a product that 
+                the customer might like go near the product and present it to them.
+            "
+        );
 
         // Create the agent
         agent = new Agent<LLMPromptData, DescritpiveContextData>(

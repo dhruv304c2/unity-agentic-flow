@@ -78,7 +78,7 @@ public class GeminiModelAgent : IAgentModel<LLMPromptData, DescritpiveContextDat
 	if (_apiService == null)
 	{
 	    Debug.LogWarning("[GeminiModelAgent] No API service provided, using dummy response");
-	    return GetDummyResponse();
+	    return new List<(string actionId, string targetId, string param)>();
 	}
 
 	try

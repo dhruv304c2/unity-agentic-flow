@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 237e1a336a393403f8dc4d6af9d8942a, type: 3}
   m_Name: GeminiAPIConfig
   m_EditorClassIdentifier: 
-  apiKey: AIzaSyC6stxJ26_-KIc-dfMA-HYYaEE0l4PS7SQ
+  apiKey: AIzaSyD1QcDwhmcAkOVYVFtsuq2u-TbAcKhgS5Y
   model: gemini-2.5-pro
   maxOutputTokens: 8192
   temperature: 0.7
