@@ -102,7 +102,7 @@ public class GeminiModelAgent : IAgentModel<LLMPromptData, DescritpiveContextDat
 	    if (string.IsNullOrEmpty(response))
 	    {
 		Debug.LogWarning("[GeminiModelAgent] Empty response from API, using dummy response");
-		return GetDummyResponse();
+		return new List<(string actionId, string targetId, string param)>();
 	    }
 
 	    // Parse the response
@@ -176,29 +176,16 @@ public class GeminiModelAgent : IAgentModel<LLMPromptData, DescritpiveContextDat
 	    catch (Exception e)
 	    {
 		Debug.LogError($"[GeminiModelAgent] Failed to parse API response: {e.Message}");
-		return GetDummyResponse();
+		return new List<(string actionId, string targetId, string param)>();
 	    }
 	}
 	catch (Exception e)
 	{
 	    Debug.LogError($"[GeminiModelAgent] API call failed: {e.Message}");
-	    return GetDummyResponse();
+	    return new List<(string actionId, string targetId, string param)>();
 	}
     }
 
-    private List<(string actionId, string targetId, string param)> GetDummyResponse()
-    {
-	var rand_x = UnityEngine.Random.Range(-5.0f, 5.0f);
-	var rand_z = UnityEngine.Random.Range(-5.0f, 5.0f);
-	return new List<(string actionId, string targetId, string param)>(){
-	    ("move",
-	    "Cube",
-	    JsonConvert.SerializeObject(
-		new MoveAction.MoveActionData(){
-		destination = new SerializableVector3(rand_x, 0, rand_z)
-	    }))
-	};
-    }
 
     [Serializable]
     private class ActionResponse
