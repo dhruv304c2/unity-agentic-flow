@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 [Serializable]
 public class LLMPromptData : IPrompt<LLMPromptData>{
@@ -137,65 +138,34 @@ public class GeminiModelAgent : IAgentModel<LLMPromptData, DescritpiveContextDat
 		// Debug log the original response
 		Debug.Log($"[GeminiModelAgent] Original response: {response}");
 
-		// First, try to fix the response if param fields have unescaped quotes
-		// Updated regex to handle nested JSON objects better
-		var fixedResponse = System.Text.RegularExpressions.Regex.Replace(
-		    response,
-		    @"""param"":""({(?:[^{}]|{[^{}]*})*})""",
-		    match => {
-			var paramContent = match.Groups[1].Value;
-			// Escape the quotes in the JSON content
-			var escapedContent = paramContent.Replace("\"", "\\\"");
-			return $@"""param"":""{escapedContent}""";
-		    }
-		);
-
-		Debug.Log($"[GeminiModelAgent] Fixed response: {fixedResponse}");
-
+		// Parse the response directly - no need for string manipulation since param is now JObject
 		List<ActionResponse> actions = null;
 		try
 		{
-		    actions = JsonConvert.DeserializeObject<List<ActionResponse>>(fixedResponse);
+		    actions = JsonConvert.DeserializeObject<List<ActionResponse>>(response);
 		    Debug.Log($"[GeminiModelAgent] Successfully parsed {actions.Count} actions");
 		}
 		catch (Exception e)
 		{
-		    // If that didn't work, try the original response
-		    Debug.LogWarning($"[GeminiModelAgent] Failed with fixed response: {e.Message}");
-		    Debug.LogWarning("[GeminiModelAgent] Trying original response");
-		    try
-		    {
-			actions = JsonConvert.DeserializeObject<List<ActionResponse>>(response);
-		    }
-		    catch (Exception e2)
-		    {
-			Debug.LogError($"[GeminiModelAgent] Failed to parse original response: {e2.Message}");
-			throw;
-		    }
+		    Debug.LogError($"[GeminiModelAgent] Failed to parse response: {e.Message}");
+		    throw;
 		}
 
 		var result = new List<(string actionId, string targetId, string param)>();
 
 		foreach (var action in actions)
 		{
-		    // The param field might have incorrect escaping from Gemini
-		    var cleanParam = action.param;
-
-		    // If the param has escaped quotes, unescape them
-		    if (cleanParam.Contains("\\\""))
-		    {
-			cleanParam = cleanParam.Replace("\\\"", "\"");
-		    }
-
-		    // Validate that param is valid JSON
+		    // Convert JObject param to string for the action execution
 		    try
 		    {
-			JsonConvert.DeserializeObject(cleanParam);
-			result.Add((action.actionId, action.targetId, cleanParam));
+			// JObject is already parsed JSON, just convert to string
+			var paramString = action.param.ToString(Formatting.None);
+			result.Add((action.actionId, action.targetId, paramString));
+			Debug.Log($"[GeminiModelAgent] Action {action.actionId} param: {paramString}");
 		    }
 		    catch (Exception paramEx)
 		    {
-			Debug.LogError($"[GeminiModelAgent] Could not parse param for action {action.actionId}: {action.param}");
+			Debug.LogError($"[GeminiModelAgent] Could not convert param for action {action.actionId}: {action.param}");
 			Debug.LogError($"[GeminiModelAgent] Error: {paramEx.Message}");
 		    }
 		}
@@ -235,6 +205,6 @@ public class GeminiModelAgent : IAgentModel<LLMPromptData, DescritpiveContextDat
     {
 	public string actionId;
 	public string targetId;
-	public string param;
+	public JObject param;
     }
 }

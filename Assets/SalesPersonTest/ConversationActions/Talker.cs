@@ -12,6 +12,6 @@ public class Talker : MonoBehaviour{
 	talkText.text = line;
 	await UniTask.WaitForSeconds(line.Length * 0.05f);
 	talkPanel.SetActive(false);
-	emoter.ResetEmote();
+	emoter.ResetEmote().Forget();
     }
 }
