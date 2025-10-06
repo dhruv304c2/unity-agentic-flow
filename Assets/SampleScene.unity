@@ -548,6 +548,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   description: A big tree
+  availableActions: []
 --- !u!65 &193572824
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -722,6 +723,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   description: This the Gemini Agent's player body
+  availableActions: []
 --- !u!65 &419029818
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -929,7 +931,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1191066104}
-  - component: {fileID: 1191066103}
   m_Layer: 0
   m_Name: ContextManager
   m_TagString: Untagged
@@ -937,18 +938,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1191066103
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1191066102}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa32b6c3ec8aa4645bc36a863cd27e0e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &1191066104
 Transform:
   m_ObjectHideFlags: 0
@@ -997,6 +986,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   description: A big tree
+  availableActions: []
 --- !u!65 &1252049715
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1433,6 +1423,7 @@ GameObject:
   - component: {fileID: 1752884961}
   - component: {fileID: 1752884963}
   - component: {fileID: 1752884962}
+  - component: {fileID: 1752884964}
   m_Layer: 0
   m_Name: TestAgentRunner
   m_TagString: Untagged
@@ -1483,7 +1474,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   geminiAPIService: {fileID: 1752884962}
   promptCollector: {fileID: 1825473491}
-  contextCollector: {fileID: 1191066103}
+  contextCollector: {fileID: 1752884964}
+--- !u!114 &1752884964
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1752884960}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa32b6c3ec8aa4645bc36a863cd27e0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1761083009
 GameObject:
   m_ObjectHideFlags: 0
@@ -1517,6 +1520,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   description: A Big scary red dragon
+  availableActions: []
 --- !u!65 &1761083011
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1807,12 +1811,12 @@ SceneRoots:
   m_Roots:
   - {fileID: 89974381}
   - {fileID: 1366869854}
-  - {fileID: 139347866}
   - {fileID: 1305151045}
   - {fileID: 419029821}
   - {fileID: 1761083014}
   - {fileID: 1252049718}
   - {fileID: 193572827}
   - {fileID: 857561352}
+  - {fileID: 139347866}
   - {fileID: 1752884961}
   - {fileID: 1191066104}

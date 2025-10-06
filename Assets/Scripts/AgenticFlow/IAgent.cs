@@ -18,7 +18,9 @@ public interface IAction< TContext> where TContext : IContext<TContext>{
 	public string Description {get;}
 	public string ParamDescription {get;}
 
-	public string GetActionDescription();
+	public string GetActionDescription(){
+		return $"{ActionId}: {Description}\nParameters: {ParamDescription}";
+	}
 
 	UniTask<bool> Execute(
 		string param,

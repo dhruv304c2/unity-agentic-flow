@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 using Cysharp.Threading.Tasks;
 
-public class TextPromptCollector : MonoBehaviour, IPromptCollector<GeminiPromptData>{
+public class TextPromptCollector : MonoBehaviour, IPromptCollector<LLMPromptData>{
     [Header("UI References")]
     [SerializeField] private TMP_InputField inputField;
     [SerializeField] private Button submitButton;
@@ -16,9 +16,9 @@ public class TextPromptCollector : MonoBehaviour, IPromptCollector<GeminiPromptD
 
     public Action OnNewPrompt { get; set; }
 
-    private UniTaskCompletionSource<GeminiPromptData> currentPromptTask;
+    private UniTaskCompletionSource<LLMPromptData> currentPromptTask;
     private CancellationTokenSource cancellationTokenSource;
-    private GeminiPromptData cachedPrompt;
+    private LLMPromptData cachedPrompt;
     private bool hasNewPrompt = false;
 
     private void Awake(){
@@ -59,7 +59,7 @@ public class TextPromptCollector : MonoBehaviour, IPromptCollector<GeminiPromptD
         cancellationTokenSource?.Cancel();
     }
 
-    public async UniTask<GeminiPromptData> CollectPrompt(){
+    public async UniTask<LLMPromptData> CollectPrompt(){
         // If we have a cached prompt ready, return it immediately
         if(hasNewPrompt && cachedPrompt != null){
             hasNewPrompt = false;
@@ -98,7 +98,7 @@ public class TextPromptCollector : MonoBehaviour, IPromptCollector<GeminiPromptD
         Debug.Log($"[TextPromptCollector] Submitting prompt: {inputField.text}");
 
         // Create prompt data
-        var promptData = new GeminiPromptData();
+        var promptData = new LLMPromptData();
         promptData.ReadFrom(inputField.text);
 
         // Cache the prompt

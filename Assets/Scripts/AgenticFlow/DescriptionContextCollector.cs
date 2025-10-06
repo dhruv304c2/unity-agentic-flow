@@ -4,7 +4,7 @@ using UnityEngine;
 using Newtonsoft.Json;
 using System.Linq;
 
-public class DescriptionContextCollector :MonoBehaviour, IContextManager<GeminiContextData>{
+public class DescriptionContextCollector :MonoBehaviour, IContextManager<DescritpiveContextData>{
     public System.Action OnContextUpdated {get; set;}
 
     DescriptionContext[] descriptionContexts;
@@ -14,8 +14,8 @@ public class DescriptionContextCollector :MonoBehaviour, IContextManager<GeminiC
 	Debug.Log($"[DescriptionContextCollector] Found {descriptionContexts.Length} description contexts");
     }
 
-    public async UniTask<GeminiContextData> CollectContext(){
-	var context = new GeminiContextData();
+    public async UniTask<DescritpiveContextData> CollectContext(){
+	var context = new DescritpiveContextData();
 
 	// Collect GameObjectContextData from each DescriptionContext
 	var contextDataArray = new GameObjectContextData[descriptionContexts.Length];

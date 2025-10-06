@@ -5,7 +5,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 [Serializable]
-public class GeminiPromptData : IPrompt<GeminiPromptData>{
+public class LLMPromptData : IPrompt<LLMPromptData>{
     public string prompt;
 
     public void ReadFrom(string str){
@@ -20,7 +20,7 @@ public class GeminiPromptData : IPrompt<GeminiPromptData>{
     }
 }
 
-public class GeminiContextData : IContext<GeminiContextData>{
+public class DescritpiveContextData : IContext<DescritpiveContextData>{
     public GameObjectContextData[] objects;
 
     public void ReadFrom(string str){
@@ -43,38 +43,38 @@ public class GeminiContextData : IContext<GeminiContextData>{
 }
 
 
-public class GeminiModelAgent : IAgentModel<GeminiPromptData, GeminiContextData>
+public class GeminiModelAgent : IAgentModel<LLMPromptData, DescritpiveContextData>
 {
-    private GeminiAPIService apiService;
-    private string goalDescription;
+    private GeminiAPIService _apiService;
+    private string _goalDescription;
+    private List<IAction<DescritpiveContextData>> _actions;
 
-    public GeminiModelAgent(GeminiAPIService apiService, string goalDescription = null)
+    public GeminiModelAgent(GeminiAPIService apiService, List<IAction<DescritpiveContextData>> action,string goalDescription = null)
     {
-	this.apiService = apiService;
-	this.goalDescription = goalDescription;
+	this._apiService = apiService;
+	this._goalDescription = goalDescription;
+	this._actions = action;
     }
 
     public void SetGoalDescription(string goal)
     {
-	goalDescription = goal;
+	_goalDescription = goal;
 	Debug.Log($"[GeminiModelAgent] Goal description set: {goal}");
     }
 
-    public List<IAction<GeminiContextData>> GetAvailableActions(){
-	return new List<IAction<GeminiContextData>>(){
-	    new MoveAction()
-	};
+    public List<IAction<DescritpiveContextData>> GetAvailableActions(){
+	return _actions;	
     }
 
     public async UniTask<List<(string actionId, string targetId, string param)>> GetResponse(
-	GeminiPromptData prompt,
-	GeminiContextData context,
+	LLMPromptData prompt,
+	DescritpiveContextData context,
 	int maxTokens
     ){
 	Debug.Log($"[GeminiModelAgent] Processing prompt: {prompt.ToString()}");
 
 	// If API service is not available, fall back to dummy response
-	if (apiService == null)
+	if (_apiService == null)
 	{
 	    Debug.LogWarning("[GeminiModelAgent] No API service provided, using dummy response");
 	    return GetDummyResponse();
@@ -84,19 +84,19 @@ public class GeminiModelAgent : IAgentModel<GeminiPromptData, GeminiContextData>
 	{
 	    // Format the prompt for Gemini API
 	    var promptWithGoal = prompt.prompt;
-	    if (!string.IsNullOrEmpty(goalDescription))
+	    if (!string.IsNullOrEmpty(_goalDescription))
 	    {
-		promptWithGoal = $"Goal: {goalDescription}\n\nCurrent request: {prompt.prompt}";
+		promptWithGoal = $"Goal: {_goalDescription}\n\nCurrent request: {prompt.prompt}";
 	    }
 
-	    var formattedPrompt = apiService.FormatAgentPrompt(
+	    var formattedPrompt = _apiService.FormatAgentPrompt(
 		promptWithGoal,
 		context.ToString(),
 		GetAvailableActions()
 	    );
 
 	    // Call Gemini API
-	    var response = await apiService.GenerateContent(formattedPrompt);
+	    var response = await _apiService.GenerateContent(formattedPrompt);
 
 	    if (string.IsNullOrEmpty(response))
 	    {

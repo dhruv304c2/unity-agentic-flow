@@ -190,7 +190,7 @@ public class GeminiAPIService : MonoBehaviour
     public string FormatAgentPrompt(
             string userPrompt,
             string context,
-            List<IAction<GeminiContextData>> availableActions
+            List<IAction<DescritpiveContextData>> availableActions
         )
     {
         // Initialize system prompt on first use
@@ -249,7 +249,7 @@ public class GeminiAPIService : MonoBehaviour
         return sb.ToString();
     }
 
-    private string CreateSystemPrompt(List<IAction<GeminiContextData>> availableActions)
+    private string CreateSystemPrompt(List<IAction<DescritpiveContextData>> availableActions)
     {
         var sb = new StringBuilder();
 
@@ -302,7 +302,7 @@ public class GeminiAPIService : MonoBehaviour
         return sb.ToString();
     }
 
-    public void InitializeSystemPrompt(List<IAction<GeminiContextData>> availableActions)
+    public void InitializeSystemPrompt(List<IAction<DescritpiveContextData>> availableActions)
     {
         if (!systemPromptInitialized || sessionHistory.Count == 0)
         {
