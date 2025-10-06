@@ -183,6 +183,7 @@ GameObject:
   - component: {fileID: 329531119}
   - component: {fileID: 329531118}
   - component: {fileID: 329531121}
+  - component: {fileID: 329531122}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -308,6 +309,21 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+--- !u!114 &329531122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 329531117}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96185c8a83d014a2e981cbcb5b2a47ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 1739845338}
+  offset: {x: 0, y: 1, z: -1}
+  followSpeed: 2
 --- !u!1 &688847749
 GameObject:
   m_ObjectHideFlags: 0
@@ -908,6 +924,12 @@ MonoBehaviour:
   description: Shop Sales person
   availableActions:
   - emote
+  - move
+--- !u!4 &1739845338 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1327674205686831306, guid: 83628a2e699576147adabb30587f44d4, type: 3}
+  m_PrefabInstance: {fileID: 1739845332}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1839285566
 GameObject:
   m_ObjectHideFlags: 0
