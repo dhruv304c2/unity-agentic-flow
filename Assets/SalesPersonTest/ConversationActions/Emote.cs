@@ -14,7 +14,6 @@ public class EmoteActionParams
 	public float blendShapeAnger;
 	public float blendShapeSorrow;
 	public float blendShapeFun;
-
 }
 
 public class Emote : IAction<DescritpiveContextData>{
@@ -48,7 +47,7 @@ public class Emote : IAction<DescritpiveContextData>{
 	    Debug.LogError("[Emote] Emoter component not found on target.");
 	    return UniTask.FromResult(false);
 	}
-	emoter.Emote(emoteParams);
+	emoter.Emote(emoteParams).Forget();
 	return UniTask.FromResult(true);
     }
 }
