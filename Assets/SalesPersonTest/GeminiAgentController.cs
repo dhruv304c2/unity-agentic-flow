@@ -53,7 +53,8 @@ public class AgentController : MonoBehaviour
         // Create the model with API service
         var actions = new System.Collections.Generic.List<IAction<DescritpiveContextData>>{
             new MoveAction(),
-            new Emote()
+            new Emote(),
+            new TalkAction()
         };
 
         var model = new GeminiModelAgent(geminiAPIService, actions);

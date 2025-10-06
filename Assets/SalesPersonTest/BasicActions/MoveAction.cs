@@ -4,8 +4,7 @@ using Newtonsoft.Json;
 using Cysharp.Threading.Tasks;
 
 [Serializable]
-public class MoveAction : IAction<DescritpiveContextData>
-{
+public class MoveAction : IAction<DescritpiveContextData>{
     public string ActionId => "move";
 
     public string Description => "Move a game object to a specified position in 3D space";
@@ -61,6 +60,10 @@ public class MoveAction : IAction<DescritpiveContextData>
                     destinationVector,
                     Time.deltaTime * 2.0f
                 );
+
+                var rot = Quaternion.LookRotation(destinationVector - target.transform.position);
+                target.transform.rotation = Quaternion.Slerp(target.transform.rotation, rot, Time.deltaTime * 5.0f);
+
                 // Wait for next frame on main thread
                 await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken);
 

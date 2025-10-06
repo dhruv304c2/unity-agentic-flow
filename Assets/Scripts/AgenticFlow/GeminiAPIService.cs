@@ -273,27 +273,28 @@ public class GeminiAPIService : MonoBehaviour
         sb.AppendLine("Always respond with a JSON array of actions to execute. Each action must have:");
         sb.AppendLine("- actionId: the action to perform");
         sb.AppendLine("- targetId: the name of the GameObject to perform the action on");
-        sb.AppendLine("- param: action-specific parameters as a properly formatted JSON string");
+        sb.AppendLine("- param: action-specific parameters as a JSON object (not a string)");
 
         sb.AppendLine("\n=== IMPORTANT: PARAM FIELD FORMAT ===");
-        sb.AppendLine("The param field must contain a JSON object as a string. Inside the param string value:");
-        sb.AppendLine("- Use ESCAPED quotes (\\\" not \")");
-        sb.AppendLine("- The entire param value is a string containing JSON");
+        sb.AppendLine("The param field must contain a JSON object directly, NOT a stringified JSON.");
+        sb.AppendLine("- Use regular JSON syntax for the param object");
+        sb.AppendLine("- Do NOT wrap the param value in quotes");
+        sb.AppendLine("- The param is a nested JSON object within each action");
 
         sb.AppendLine("\nExample - Moving objects in parallel (different targets):");
         sb.AppendLine("[");
-        sb.AppendLine("  {\"actionId\":\"move\",\"targetId\":\"Cube1\",\"param\":\"{\\\"destination\\\":{\\\"x\\\":-2.5,\\\"y\\\":0,\\\"z\\\":3.0}}\"},");
-        sb.AppendLine("  {\"actionId\":\"move\",\"targetId\":\"Cube2\",\"param\":\"{\\\"destination\\\":{\\\"x\\\":2.5,\\\"y\\\":0,\\\"z\\\":-3.0}}\"}");
+        sb.AppendLine("  {\"actionId\":\"move\",\"targetId\":\"Cube1\",\"param\":{\"destination\":{\"x\":-2.5,\"y\":0,\"z\":3.0}}},");
+        sb.AppendLine("  {\"actionId\":\"move\",\"targetId\":\"Cube2\",\"param\":{\"destination\":{\"x\":2.5,\"y\":0,\"z\":-3.0}}}");
         sb.AppendLine("]");
 
         sb.AppendLine("\nExample - Sequential movements for one object (same target):");
         sb.AppendLine("[");
-        sb.AppendLine("  {\"actionId\":\"move\",\"targetId\":\"Cube1\",\"param\":\"{\\\"destination\\\":{\\\"x\\\":0,\\\"y\\\":0,\\\"z\\\":5}}\"},");
-        sb.AppendLine("  {\"actionId\":\"move\",\"targetId\":\"Cube1\",\"param\":\"{\\\"destination\\\":{\\\"x\\\":5,\\\"y\\\":0,\\\"z\\\":5}}\"}");
+        sb.AppendLine("  {\"actionId\":\"move\",\"targetId\":\"Cube1\",\"param\":{\"destination\":{\"x\":0,\"y\":0,\"z\":5}}},");
+        sb.AppendLine("  {\"actionId\":\"move\",\"targetId\":\"Cube1\",\"param\":{\"destination\":{\"x\":5,\"y\":0,\"z\":5}}}");
         sb.AppendLine("]");
 
         sb.AppendLine("\n=== CRITICAL RULES ===");
-        sb.AppendLine("1. The param field value MUST use escaped quotes: \\\" not \"");
+        sb.AppendLine("1. The param field is a JSON object, NOT a string");
         sb.AppendLine("2. Only respond with the raw JSON array, no additional text");
         sb.AppendLine("3. No markdown formatting, no code blocks, no backticks");
         sb.AppendLine("4. Response must start with [ and end with ]");
@@ -331,7 +332,7 @@ public class GeminiAPIService : MonoBehaviour
                 role = "model",
                 parts = new[]
                 {
-                    new GeminiRequest.Content.Part { text = "Understood. I will control Unity objects using the specified JSON format with properly escaped quotes in the param field, executing actions in parallel for different targets and sequentially for the same target." }
+                    new GeminiRequest.Content.Part { text = "Understood. I will control Unity objects using the specified JSON format with param as a JSON object (not a string), executing actions in parallel for different targets and sequentially for the same target." }
                 }
             };
             sessionHistory.Insert(1, modelAck);
