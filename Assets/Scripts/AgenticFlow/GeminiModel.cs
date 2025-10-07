@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
+using System.Linq;
 
 [Serializable]
 public class LLMPromptData : IPrompt<LLMPromptData>{
@@ -67,7 +68,7 @@ public class GeminiModelAgent : IAgentModel<LLMPromptData, DescritpiveContextDat
 	return _actions;	
     }
 
-    public async UniTask<List<(string actionId, string targetId, string param)>> GetResponse(
+    public async UniTask<List<List<AgentActionResponse>>> GetResponse(
 	LLMPromptData prompt,
 	DescritpiveContextData context,
 	int maxTokens
@@ -78,7 +79,7 @@ public class GeminiModelAgent : IAgentModel<LLMPromptData, DescritpiveContextDat
 	if (_apiService == null)
 	{
 	    Debug.LogWarning("[GeminiModelAgent] No API service provided, using dummy response");
-	    return new List<(string actionId, string targetId, string param)>();
+	    return new List<List<AgentActionResponse>>();
 	}
 
 	try
@@ -102,7 +103,7 @@ public class GeminiModelAgent : IAgentModel<LLMPromptData, DescritpiveContextDat
 	    if (string.IsNullOrEmpty(response))
 	    {
 		Debug.LogWarning("[GeminiModelAgent] Empty response from API, using dummy response");
-		return new List<(string actionId, string targetId, string param)>();
+		return new List<List<AgentActionResponse>>();
 	    }
 
 	    // Parse the response
@@ -138,12 +139,12 @@ public class GeminiModelAgent : IAgentModel<LLMPromptData, DescritpiveContextDat
 		// Debug log the original response
 		Debug.Log($"[GeminiModelAgent] Original response: {response}");
 
-		// Parse the response directly - no need for string manipulation since param is now JObject
-		List<ActionResponse> actions = null;
+		// Parse the response - expecting array of arrays
+		List<List<ActionResponse>> actionSequences = null;
 		try
 		{
-		    actions = JsonConvert.DeserializeObject<List<ActionResponse>>(response);
-		    Debug.Log($"[GeminiModelAgent] Successfully parsed {actions.Count} actions");
+		    actionSequences = JsonConvert.DeserializeObject<List<List<ActionResponse>>>(response);
+		    Debug.Log($"[GeminiModelAgent] Successfully parsed {actionSequences.Count} sequences");
 		}
 		catch (Exception e)
 		{
@@ -151,38 +152,48 @@ public class GeminiModelAgent : IAgentModel<LLMPromptData, DescritpiveContextDat
 		    throw;
 		}
 
-		var result = new List<(string actionId, string targetId, string param)>();
+		var result = new List<List<AgentActionResponse>>();
 
-		foreach (var action in actions)
+		foreach (var sequence in actionSequences)
 		{
-		    // Convert JObject param to string for the action execution
-		    try
+		    var sequenceResult = new List<AgentActionResponse>();
+
+		    foreach (var action in sequence)
 		    {
-			// JObject is already parsed JSON, just convert to string
-			var paramString = action.param.ToString(Formatting.None);
-			result.Add((action.actionId, action.targetId, paramString));
-			Debug.Log($"[GeminiModelAgent] Action {action.actionId} param: {paramString}");
+			// Convert JObject param to string for the action execution
+			try
+			{
+			    // JObject is already parsed JSON, just convert to string
+			    var paramString = action.param.ToString(Formatting.None);
+			    sequenceResult.Add(new AgentActionResponse(action.actionId, action.targetId, paramString));
+			    Debug.Log($"[GeminiModelAgent] Action {action.actionId} param: {paramString}");
+			}
+			catch (Exception paramEx)
+			{
+			    Debug.LogError($"[GeminiModelAgent] Could not convert param for action {action.actionId}: {action.param}");
+			    Debug.LogError($"[GeminiModelAgent] Error: {paramEx.Message}");
+			}
 		    }
-		    catch (Exception paramEx)
+
+		    if (sequenceResult.Count > 0)
 		    {
-			Debug.LogError($"[GeminiModelAgent] Could not convert param for action {action.actionId}: {action.param}");
-			Debug.LogError($"[GeminiModelAgent] Error: {paramEx.Message}");
+			result.Add(sequenceResult);
 		    }
 		}
 
-		Debug.Log($"[GeminiModelAgent] Parsed {result.Count} actions from API response");
+		Debug.Log($"[GeminiModelAgent] Parsed {result.Count} sequences with total {result.Sum(s => s.Count)} actions");
 		return result;
 	    }
 	    catch (Exception e)
 	    {
 		Debug.LogError($"[GeminiModelAgent] Failed to parse API response: {e.Message}");
-		return new List<(string actionId, string targetId, string param)>();
+		return new List<List<AgentActionResponse>>();
 	    }
 	}
 	catch (Exception e)
 	{
 	    Debug.LogError($"[GeminiModelAgent] API call failed: {e.Message}");
-	    return new List<(string actionId, string targetId, string param)>();
+	    return new List<List<AgentActionResponse>>();
 	}
     }
 

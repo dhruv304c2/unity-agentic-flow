@@ -256,12 +256,12 @@ public class GeminiAPIService : MonoBehaviour
         sb.AppendLine("You are an AI agent that can control objects in a Unity scene.");
 
         sb.AppendLine("\n=== IMPORTANT EXECUTION BEHAVIOR ===");
-        sb.AppendLine("Actions for DIFFERENT targets execute IN PARALLEL (simultaneously):");
-        sb.AppendLine("- If you specify actions for 'Cube1' and 'Cube2', they will move at the same time");
-        sb.AppendLine("- This allows you to coordinate multiple objects moving together");
-        sb.AppendLine("\nActions for the SAME target execute SEQUENTIALLY (one after another):");
-        sb.AppendLine("- If you specify two move actions for 'Cube1', the second will wait for the first to complete");
-        sb.AppendLine("- This allows you to create paths or sequences of movements for a single object");
+        sb.AppendLine("You must return an ARRAY OF ARRAYS. Each inner array is a sequence that executes sequentially.");
+        sb.AppendLine("Multiple sequences (outer arrays) execute IN PARALLEL (simultaneously).");
+        sb.AppendLine("");
+        sb.AppendLine("- Actions within a sequence execute one after another (sequential)");
+        sb.AppendLine("- Different sequences execute at the same time (parallel)");
+        sb.AppendLine("- This allows complex choreography: e.g., Cube1 moves in a path while Cube2 simultaneously moves in a different path");
 
         sb.AppendLine("\n=== AVAILABLE ACTIONS ===");
         foreach (var action in availableActions)
@@ -270,7 +270,8 @@ public class GeminiAPIService : MonoBehaviour
         }
 
         sb.AppendLine("\n=== RESPONSE FORMAT ===");
-        sb.AppendLine("Always respond with a JSON array of actions to execute. Each action must have:");
+        sb.AppendLine("Always respond with a JSON ARRAY OF ARRAYS. Each inner array contains actions to execute sequentially.");
+        sb.AppendLine("Each action must have:");
         sb.AppendLine("- actionId: the action to perform");
         sb.AppendLine("- targetId: the name of the GameObject to perform the action on");
         sb.AppendLine("- param: action-specific parameters as a JSON object (not a string)");
@@ -281,24 +282,34 @@ public class GeminiAPIService : MonoBehaviour
         sb.AppendLine("- Do NOT wrap the param value in quotes");
         sb.AppendLine("- The param is a nested JSON object within each action");
 
-        sb.AppendLine("\nExample - Moving objects in parallel (different targets):");
+        sb.AppendLine("\nExample - Two objects moving in parallel paths:");
         sb.AppendLine("[");
-        sb.AppendLine("  {\"actionId\":\"move\",\"targetId\":\"Cube1\",\"param\":{\"destination\":{\"x\":-2.5,\"y\":0,\"z\":3.0}}},");
-        sb.AppendLine("  {\"actionId\":\"move\",\"targetId\":\"Cube2\",\"param\":{\"destination\":{\"x\":2.5,\"y\":0,\"z\":-3.0}}}");
+        sb.AppendLine("  [");
+        sb.AppendLine("    {\"actionId\":\"move\",\"targetId\":\"Cube1\",\"param\":{\"x\":-2.5,\"y\":0,\"z\":3.0}},");
+        sb.AppendLine("    {\"actionId\":\"move\",\"targetId\":\"Cube1\",\"param\":{\"x\":-2.5,\"y\":0,\"z\":-3.0}}");
+        sb.AppendLine("  ],");
+        sb.AppendLine("  [");
+        sb.AppendLine("    {\"actionId\":\"move\",\"targetId\":\"Cube2\",\"param\":{\"x\":2.5,\"y\":0,\"z\":-3.0}},");
+        sb.AppendLine("    {\"actionId\":\"move\",\"targetId\":\"Cube2\",\"param\":{\"x\":2.5,\"y\":0,\"z\":3.0}}");
+        sb.AppendLine("  ]");
         sb.AppendLine("]");
 
-        sb.AppendLine("\nExample - Sequential movements for one object (same target):");
+        sb.AppendLine("\nExample - Sequential movement for one object:");
         sb.AppendLine("[");
-        sb.AppendLine("  {\"actionId\":\"move\",\"targetId\":\"Cube1\",\"param\":{\"destination\":{\"x\":0,\"y\":0,\"z\":5}}},");
-        sb.AppendLine("  {\"actionId\":\"move\",\"targetId\":\"Cube1\",\"param\":{\"destination\":{\"x\":5,\"y\":0,\"z\":5}}}");
+        sb.AppendLine("  [");
+        sb.AppendLine("    {\"actionId\":\"move\",\"targetId\":\"Cube1\",\"param\":{\"x\":0,\"y\":0,\"z\":5}},");
+        sb.AppendLine("    {\"actionId\":\"move\",\"targetId\":\"Cube1\",\"param\":{\"x\":5,\"y\":0,\"z\":5}},");
+        sb.AppendLine("    {\"actionId\":\"move\",\"targetId\":\"Cube1\",\"param\":{\"x\":5,\"y\":0,\"z\":0}}");
+        sb.AppendLine("  ]");
         sb.AppendLine("]");
 
         sb.AppendLine("\n=== CRITICAL RULES ===");
-        sb.AppendLine("1. The param field is a JSON object, NOT a string");
-        sb.AppendLine("2. Only respond with the raw JSON array, no additional text");
-        sb.AppendLine("3. No markdown formatting, no code blocks, no backticks");
-        sb.AppendLine("4. Response must start with [ and end with ]");
-        sb.AppendLine("5. Each action object must be valid JSON");
+        sb.AppendLine("1. ALWAYS return an ARRAY OF ARRAYS (even for single actions: [[{...}]])");
+        sb.AppendLine("2. The param field is a JSON object, NOT a string");
+        sb.AppendLine("3. Only respond with the raw JSON array, no additional text");
+        sb.AppendLine("4. No markdown formatting, no code blocks, no backticks");
+        sb.AppendLine("5. Response must start with [ and end with ]");
+        sb.AppendLine("6. Each action object must be valid JSON");
 
         return sb.ToString();
     }
@@ -332,7 +343,7 @@ public class GeminiAPIService : MonoBehaviour
                 role = "model",
                 parts = new[]
                 {
-                    new GeminiRequest.Content.Part { text = "Understood. I will control Unity objects using the specified JSON format with param as a JSON object (not a string), executing actions in parallel for different targets and sequentially for the same target." }
+                    new GeminiRequest.Content.Part { text = "Understood. I will control Unity objects using the specified JSON array of arrays format, where each inner array executes sequentially and multiple arrays execute in parallel. The param field will be a JSON object (not a string)." }
                 }
             };
             sessionHistory.Insert(1, modelAck);

@@ -10,11 +10,11 @@ public class PresentAction : IAction<DescritpiveContextData>
 
     public string Description => "Present an item by moving it to a presentation point and rotating it, then returning it back. can only be performed when you are close to the item.";
 
-    public string ParamDescription => @"{
-        ""presentaionTarget"": ""string"", // Item to present
-        ""duration"": float // Presentation duration in seconds (default 2.0)
-    }
-    ";
+    public ActionParameter[] Parameters => new ActionParameter[]
+    {
+        new ActionParameter("presentaionTarget", "string", "Item to present"),
+        new ActionParameter("duration", "float", "Presentation duration in seconds (default 2.0)")
+    };
 
     public class PresentActionData{
         public string presentaionTarget; // Item to present

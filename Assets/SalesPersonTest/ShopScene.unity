@@ -3178,6 +3178,7 @@ GameObject:
   - component: {fileID: 1738648551}
   - component: {fileID: 1738648550}
   - component: {fileID: 1738648549}
+  - component: {fileID: 1738648553}
   m_Layer: 0
   m_Name: Plane
   m_TagString: Untagged
@@ -3275,6 +3276,38 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1738648553
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1738648548}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
+  m_AgentTypeID: 0
+  m_CollectObjects: 0
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_UseGeometry: 0
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 0
+  m_VoxelSize: 0.06666667
+  m_MinRegionArea: 2
+  m_NavMeshData: {fileID: 23800000, guid: cda238d3655b847e8aabd6442dcc4427, type: 2}
+  m_BuildHeightMesh: 0
 --- !u!1001 &1739845332
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3381,7 +3414,7 @@ PrefabInstance:
       objectReference: {fileID: 9100000, guid: 8b4ab658043a748fcb425e93d8f2fb68, type: 2}
     - target: {fileID: 8818148501639231403, guid: 83628a2e699576147adabb30587f44d4, type: 3}
       propertyPath: m_ApplyRootMotion
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3405,6 +3438,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2350652681907635850, guid: 83628a2e699576147adabb30587f44d4, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1739845341}
+    - targetCorrespondingSourceObject: {fileID: 2350652681907635850, guid: 83628a2e699576147adabb30587f44d4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1739845342}
   m_SourcePrefab: {fileID: 100100000, guid: 83628a2e699576147adabb30587f44d4, type: 3}
 --- !u!1 &1739845333 stripped
 GameObject:
@@ -3468,6 +3504,7 @@ MonoBehaviour:
   talkText: {fileID: 553622481}
   emoter: {fileID: 1739845334}
   typeSpeed: 0.05
+  _animator: {fileID: 288773346}
 --- !u!114 &1739845340
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3482,6 +3519,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isMoving: 0
   _animator: {fileID: 288773346}
+  moveSpeed: 1
 --- !u!114 &1739845341
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3495,6 +3533,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _presentPoint: {fileID: 1635545840}
+--- !u!195 &1739845342
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1739845333}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
 --- !u!1001 &1750694089
 PrefabInstance:
   m_ObjectHideFlags: 0

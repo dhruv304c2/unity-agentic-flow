@@ -7,7 +7,7 @@ public class AgentController : MonoBehaviour
     [Header("Agent Components")]
     [SerializeField] private GeminiAPIService geminiAPIService;
     [SerializeField] private TextPromptCollector promptCollector;
-    [SerializeField] private DescriptionContextCollector contextCollector;
+    [SerializeField] private DescriptionManager contextCollector;
 
     private Agent<LLMPromptData, DescritpiveContextData> agent;
     private CancellationTokenSource cancellationTokenSource;
@@ -42,7 +42,7 @@ public class AgentController : MonoBehaviour
 
         if (contextCollector == null)
         {
-            contextCollector = GetComponent<DescriptionContextCollector>();
+            contextCollector = GetComponent<DescriptionManager>();
             if (contextCollector == null)
             {
                 Debug.LogError("[AgentController] DescriptionContextCollector not found! Please add it to this GameObject.");
@@ -74,6 +74,14 @@ public class AgentController : MonoBehaviour
             contextCollector,
             promptCollector
         );
+
+        agent.OnIdle += () => {
+            promptCollector.gameObject.SetActive(true);
+        };
+
+        agent.OnProcessing += () => {
+            promptCollector.gameObject.SetActive(false);
+        };
 
         // Start the agent
         StartAgent();

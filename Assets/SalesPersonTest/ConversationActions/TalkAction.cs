@@ -9,9 +9,11 @@ public class TalkActionParams{
 public class TalkAction : IAction<DescritpiveContextData>{
     public string ActionId => "talk";
     public string Description => "Make the character say a line of dialogue";
-    public string ParamDescription => @"{
-	""dialogueLine"": string,
-    }";
+
+    public ActionParameter[] Parameters => new ActionParameter[]
+    {
+        new ActionParameter("dialogueLine", "string", "The line of dialogue to speak")
+    };
 
     public async UniTask<bool> Execute(
 	string param,

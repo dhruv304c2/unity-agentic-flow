@@ -1,20 +1,25 @@
 using System;
 using UnityEngine;
+using UnityEngine.AI;
 using Newtonsoft.Json;
 using Cysharp.Threading.Tasks;
 
 [Serializable]
 public class MoveAction : IAction<DescritpiveContextData>{
     public string ActionId => "move";
-
     public string Description => "Move a game object to a specified position in 3D space";
-    public string ParamDescription => @"{
-        ""destination"": { ""x"": float, ""y"": float, ""z"": float }
-    }";
+    public ActionParameter[] Parameters => new ActionParameter[]
+    {
+        new ActionParameter("x", "float", "The target X coordinate"),
+        new ActionParameter("y", "float", "The target Y coordinate"),
+        new ActionParameter("z", "float", "The target Z coordinate")
+    };
 
     public class MoveActionData
     {
-        public SerializableVector3 destination;
+        public float x;
+        public float y;
+        public float z;
     }
 
     string targetObjectName;
@@ -61,38 +66,67 @@ public class MoveAction : IAction<DescritpiveContextData>{
                 return false;
             }
 
-            mover.isMoving = true;
-
-            // Move object smoothly on main thread
-            Vector3 destinationVector = data.destination; // Implicit conversion
-            float startTime = Time.time;
-
-            while (Vector3.Distance(target.transform.position, destinationVector) > 0.1f
-                    && !cancellationToken.IsCancellationRequested)
+            var navAgent = mover.NavMeshAgent;
+            if (navAgent == null || !navAgent.enabled)
             {
-                target.transform.position = Vector3.MoveTowards(
-                    target.transform.position,
-                    destinationVector,
-                    Time.deltaTime * 2.0f
-                );
+                Debug.LogError($"[MoveAction] NavMeshAgent not found or disabled on target {target.name}");
+                return false;
+            }
 
-                var rot = Quaternion.LookRotation(destinationVector - target.transform.position);
-                target.transform.rotation = Quaternion.Slerp(target.transform.rotation, rot, Time.deltaTime * 5.0f);
+            // Get the desired destination
+            Vector3 destinationVector = new Vector3(data.x, data.y, data.z);
 
-                // Wait for next frame on main thread
+            // Find the nearest point on NavMesh to the destination
+            NavMeshHit hit;
+            float maxDistance = 10f; // Maximum distance to search for a valid point
+            if (!NavMesh.SamplePosition(destinationVector, out hit, maxDistance, NavMesh.AllAreas))
+            {
+                Debug.LogWarning($"[MoveAction] Could not find valid NavMesh position near {destinationVector}");
+                return false;
+            }
+
+            Vector3 finalDestination = hit.position;
+            Debug.Log($"[MoveAction] Moving {target.name} to nearest reachable point: {finalDestination} (requested: {destinationVector})");
+
+            // Set the destination
+            if (!navAgent.SetDestination(finalDestination))
+            {
+                Debug.LogError($"[MoveAction] Failed to set destination for {target.name}");
+                return false;
+            }
+
+            // Wait for the agent to reach destination
+            float startTime = Time.time;
+            float stoppingDistance = navAgent.stoppingDistance > 0 ? navAgent.stoppingDistance : 0.5f;
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                // Check if we've reached the destination
+                if (!navAgent.pathPending && navAgent.remainingDistance <= stoppingDistance)
+                {
+                    // Check if agent has stopped moving
+                    if (navAgent.velocity.magnitude < 0.1f)
+                    {
+                        break;
+                    }
+                }
+
+                // Wait for next frame
                 await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken);
 
-                // Timeout after 10 seconds
-                if (Time.time - startTime > 10f)
+                // Timeout after 30 seconds (increased for longer paths)
+                if (Time.time - startTime > 30f)
                 {
                     Debug.LogWarning($"[MoveAction] Timeout moving {target.name}");
+                    navAgent.isStopped = true;
                     break;
                 }
             }
 
-            Debug.Log($"[MoveAction] Completed moving {target.name} to {destinationVector}");
+            // Stop the agent
+            navAgent.isStopped = true;
 
-            mover.isMoving = false;
+            Debug.Log($"[MoveAction] Completed moving {target.name} to {target.transform.position}");
             return true;
 
         }

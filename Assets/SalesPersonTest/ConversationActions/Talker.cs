@@ -7,6 +7,7 @@ public class Talker : MonoBehaviour {
     [SerializeField] TextMeshProUGUI talkText;
     [SerializeField] Emoter emoter;
     [SerializeField] float typeSpeed = 0.05f; // seconds per character
+    [SerializeField] Animator _animator;
 
     bool _isTalking;
 
@@ -16,6 +17,10 @@ public class Talker : MonoBehaviour {
 
         talkPanel.SetActive(true);
         talkText.text = "";
+
+        if(_animator){
+            _animator.SetLayerWeight(1,1.0f);
+        }
 
         // Typewriter effect
         for (int i = 0; i < line.Length; i++) {
@@ -27,6 +32,9 @@ public class Talker : MonoBehaviour {
         await UniTask.WaitForSeconds(2f);
 
         talkPanel.SetActive(false);
+        if(_animator){
+            _animator.SetLayerWeight(1,0.0f);
+        }
         emoter.ResetEmote().Forget();
         _isTalking = false;
     }

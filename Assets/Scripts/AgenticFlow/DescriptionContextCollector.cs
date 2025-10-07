@@ -4,7 +4,7 @@ using UnityEngine;
 using Newtonsoft.Json;
 using System.Linq;
 
-public class DescriptionContextCollector :MonoBehaviour, IContextManager<DescritpiveContextData>{
+public class DescriptionManager :MonoBehaviour, IContextManager<DescritpiveContextData>{
     public System.Action OnContextUpdated {get; set;}
 
     DescriptionContext[] descriptionContexts;

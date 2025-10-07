@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using System;
 
 public class Agent< TPrompt, TContext>
 	where TPrompt : IPrompt<TPrompt>
@@ -27,6 +28,9 @@ public class Agent< TPrompt, TContext>
 	_promptCollector.OnNewPrompt += () => triggerUpdate = true;
     }
 
+    public Action OnProcessing {get; set;}
+    public Action OnIdle {get; set;}
+
     public async UniTask Run(CancellationToken cancellationToken=default){
 	// Ensure we're running on the main thread
 	await UniTask.SwitchToMainThread();
@@ -42,6 +46,7 @@ public class Agent< TPrompt, TContext>
 	    Debug.Log($"[Agent] Triggered on frame {Time.frameCount}");
 
 	    triggerUpdate = false;
+	    OnProcessing?.Invoke();
 
 	    try{
 		// Collect prompt - this should return immediately if a prompt is cached
@@ -57,37 +62,26 @@ public class Agent< TPrompt, TContext>
 
 		Debug.Log("[Agent] Getting response from model...");
 
-		var actions = await _model.GetResponse(prompt, context, 1000);
+		var actionSequences = await _model.GetResponse(prompt, context, 1000);
 
-		Debug.Log($"[Agent] Received {actions.Count} actions");
-
-		// Group actions by target
-		var actionGroups = actions.GroupBy(a => a.targetId)
-		    .ToDictionary(g => g.Key, g => g.ToList());
-
-		Debug.Log($"[Agent] Grouped into {actionGroups.Count} target groups");
+		Debug.Log($"[Agent] Received {actionSequences.Count} sequences with total {actionSequences.Sum(s => s.Count)} actions");
 
 		// Temporarily disable triggers during action execution
 		var originalContextCallback = _contextManager.OnContextUpdated;
 		_contextManager.OnContextUpdated = null;
 
-		// Execute action groups in parallel
+		// Execute sequences in parallel
 		var parallelTasks = new List<UniTask>();
 
-		foreach(var (targetId, targetActions) in actionGroups){
-		    // Find the target GameObject
-		    var targetObject = UnityEngine.GameObject.Find(targetId);
-		    if(targetObject == null){
-			Debug.LogWarning($"[Agent] Target object '{targetId}' not found");
-			continue;
-		    }
+		for(int i = 0; i < actionSequences.Count; i++){
+		    var sequence = actionSequences[i];
 
-		    // Create a task for this target's sequential actions
-		    var targetTask = ExecuteActionsForTarget(targetObject, targetActions, cancellationToken);
-		    parallelTasks.Add(targetTask);
+		    // Create a task for this sequence's sequential actions
+		    var sequenceTask = ExecuteActionSequence(sequence, i, cancellationToken);
+		    parallelTasks.Add(sequenceTask);
 		}
 
-		// Wait for all parallel tasks to complete
+		// Wait for all parallel sequences to complete
 		await UniTask.WhenAll(parallelTasks);
 
 		// Restore context callback
@@ -96,45 +90,54 @@ public class Agent< TPrompt, TContext>
 	    catch(System.Exception ex){
 		Debug.LogError($"[Agent] Error: {ex.Message}\n{ex.StackTrace}");
 	    }
+
+	    OnIdle?.Invoke();
 	}
 
 	Debug.Log("[Agent] Run loop ended");
     }
 
-    private async UniTask ExecuteActionsForTarget(
-	GameObject target,
-	List<(string actionId, string targetId, string param)> actions,
+    private async UniTask ExecuteActionSequence(
+	List<AgentActionResponse> sequence,
+	int sequenceIndex,
 	CancellationToken cancellationToken)
     {
-	Debug.Log($"[Agent] Starting {actions.Count} actions for target: {target.name}");
+	Debug.Log($"[Agent] Starting sequence {sequenceIndex} with {sequence.Count} actions");
 
-	foreach(var (actionId, _, param) in actions){
+	foreach(var actionResponse in sequence){
 	    if(cancellationToken.IsCancellationRequested) break;
 
-	    Debug.Log($"[Agent] Executing {actionId} on {target.name}");
+	    // Find the target GameObject
+	    var targetObject = UnityEngine.GameObject.Find(actionResponse.targetId);
+	    if(targetObject == null){
+		Debug.LogWarning($"[Agent] Target object '{actionResponse.targetId}' not found");
+		continue;
+	    }
+
+	    Debug.Log($"[Agent] Executing {actionResponse.actionId} on {targetObject.name}");
 
 	    var availableActions = _model.GetAvailableActions();
-	    var action = availableActions.Find(a => a.ActionId == actionId);
+	    var action = availableActions.Find(a => a.ActionId == actionResponse.actionId);
 
 	    if(action == null){
-		Debug.LogWarning($"[Agent] Action {actionId} not found");
+		Debug.LogWarning($"[Agent] Action {actionResponse.actionId} not found");
 		continue;
 	    }
 
 	    try{
-		var success = await action.Execute(param, target, _contextManager, cancellationToken);
+		var success = await action.Execute(actionResponse.param, targetObject, _contextManager, cancellationToken);
 		if(success){
-		    Debug.Log($"[Agent] Action {actionId} completed on {target.name}");
+		    Debug.Log($"[Agent] Action {actionResponse.actionId} completed on {targetObject.name}");
 		}
 		else{
-		    Debug.LogWarning($"[Agent] Action {actionId} failed on {target.name}");
+		    Debug.LogWarning($"[Agent] Action {actionResponse.actionId} failed on {targetObject.name}");
 		}
 	    }
 	    catch(System.Exception ex){
-		Debug.LogError($"[Agent] Error executing {actionId} on {target.name}: {ex.Message}");
+		Debug.LogError($"[Agent] Error executing {actionResponse.actionId} on {targetObject.name}: {ex.Message}");
 	    }
 	}
 
-	Debug.Log($"[Agent] Completed all actions for target: {target.name}");
+	Debug.Log($"[Agent] Completed sequence {sequenceIndex}");
     }
 }

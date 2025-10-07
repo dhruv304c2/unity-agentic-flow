@@ -19,18 +19,20 @@ public class EmoteActionParams
 public class Emote : IAction<DescritpiveContextData>{
     public string ActionId => "emote";
     public string Description => "Make the character perform an emote animation.";
-    public string ParamDescription => @"{ 
-	""blendShapeBlink"": float (0.0 to 1.0)
-	""blendShapeMouthA"": float (0.0 to 1.0)
-	""blendShapeMouthI"": float (0.0 to 1.0)
-	""blendShapeMouthU"": float (0.0 to 1.0)
-	""blendShapeMouthE"": float (0.0 to 1.0)
-	""blendShapeMouthO"": float (0.0 to 1.0)
-	""blendShapeJoy"": float (0.0 to 1.0)
-	""blendShapeAnger"": float (0.0 to 1.0)
-	""blendShapeSorrow"": float (0.0 to 1.0)
-	""blendShapeFun"": float (0.0 to 1.0)
-    }";
+
+    public ActionParameter[] Parameters => new ActionParameter[]
+    {
+        new ActionParameter("blendShapeBlink", "float", "Blink blend shape (0.0 to 1.0)"),
+        new ActionParameter("blendShapeMouthA", "float", "Mouth A blend shape (0.0 to 1.0)"),
+        new ActionParameter("blendShapeMouthI", "float", "Mouth I blend shape (0.0 to 1.0)"),
+        new ActionParameter("blendShapeMouthU", "float", "Mouth U blend shape (0.0 to 1.0)"),
+        new ActionParameter("blendShapeMouthE", "float", "Mouth E blend shape (0.0 to 1.0)"),
+        new ActionParameter("blendShapeMouthO", "float", "Mouth O blend shape (0.0 to 1.0)"),
+        new ActionParameter("blendShapeJoy", "float", "Joy expression blend shape (0.0 to 1.0)"),
+        new ActionParameter("blendShapeAnger", "float", "Anger expression blend shape (0.0 to 1.0)"),
+        new ActionParameter("blendShapeSorrow", "float", "Sorrow expression blend shape (0.0 to 1.0)"),
+        new ActionParameter("blendShapeFun", "float", "Fun expression blend shape (0.0 to 1.0)")
+    };
 
     public UniTask<bool> Execute(
 	string param, 
