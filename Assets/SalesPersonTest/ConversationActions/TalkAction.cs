@@ -13,7 +13,7 @@ public class TalkAction : IAction<DescritpiveContextData>{
 	""dialogueLine"": string,
     }";
 
-    public UniTask<bool> Execute(
+    public async UniTask<bool> Execute(
 	string param,
 	GameObject target,
 	IContextManager<DescritpiveContextData> context,
@@ -22,17 +22,17 @@ public class TalkAction : IAction<DescritpiveContextData>{
 	var talkParams = JsonUtility.FromJson<TalkActionParams>(param);
 	if(talkParams == null){
 	    Debug.LogError("[TalkAction] Failed to parse parameters.");
-	    return UniTask.FromResult(false);
+	    return false;
 	}
 
 	var talker = target.GetComponent<Talker>();
 	if(talker == null){
 	    Debug.LogError("[TalkAction] Talker component not found on target.");
-	    return UniTask.FromResult(false);
+	    return false;
 	}
 
-	talker.Talk(talkParams.dialogueLine).Forget();
-	return UniTask.FromResult(true);
+	await talker.Talk(talkParams.dialogueLine);
+	return true;
     }
 }
 
