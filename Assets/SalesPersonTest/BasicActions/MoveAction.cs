@@ -8,7 +8,9 @@ public class MoveAction : IAction<DescritpiveContextData>{
     public string ActionId => "move";
 
     public string Description => "Move a game object to a specified position in 3D space";
-    public string ParamDescription => "JSON object with 'destination' (x,y,z coordinates)";
+    public string ParamDescription => @"{
+        ""destination"": { ""x"": float, ""y"": float, ""z"": float }
+    }";
 
     public class MoveActionData
     {

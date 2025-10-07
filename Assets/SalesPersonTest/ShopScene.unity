@@ -628,6 +628,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 95513644}
   m_SourcePrefab: {fileID: 100100000, guid: 287413f3d73300440ac35a9aaceba5b5, type: 3}
+--- !u!95 &288773346 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 8818148501639231403, guid: 83628a2e699576147adabb30587f44d4, type: 3}
+  m_PrefabInstance: {fileID: 1739845332}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &295030969
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3476,6 +3481,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isMoving: 0
+  _animator: {fileID: 288773346}
 --- !u!114 &1739845341
 MonoBehaviour:
   m_ObjectHideFlags: 0
